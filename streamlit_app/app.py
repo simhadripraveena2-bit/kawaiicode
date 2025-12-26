@@ -424,8 +424,7 @@ def render_landing_page():
 
     # --- INTERACTIVE HERO CLASSES ---
     st.markdown("<br><br><h2 style='text-align: center; color: #81ecec; font-family: \"Fredoka\", sans-serif;'>🏆 Choose Your Hero Class</h2>", unsafe_allow_html=True)
-
-    # Define the Quest Data
+    
     quest_lines = {
         "analyst": {
             "name": "The Royal Analyst", "icon": "📊", "outcome": "Data Analyst", "color": "#74b9ff",
@@ -449,57 +448,60 @@ def render_landing_page():
         }
     }
 
-    # Track selection in session state
     if "selected_hero_quest" not in st.session_state:
         st.session_state.selected_hero_quest = None
 
-    # Create the clickable list
     for key, quest in quest_lines.items():
-        # Highlighting the selected card
         is_selected = st.session_state.selected_hero_quest == key
         bg_style = "background: rgba(108, 92, 231, 0.25);" if is_selected else "background: rgba(18, 18, 42, 0.9);"
-
-        # We use a container and a button to make the whole row "clickable"
+        
         with st.container():
+            # Card UI
             st.markdown(f"""
-            <div style="{bg_style} border-left: 5px solid {quest['color']}; border-radius: 15px; padding: 1rem; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="{bg_style} border-left: 5px solid {quest['color']}; border-radius: 15px; padding: 1.5rem; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center;">
-                        <span style="font-size: 2rem; margin-right: 15px;">{quest['icon']}</span>
+                        <span style="font-size: 2.5rem; margin-right: 20px;">{quest['icon']}</span>
                         <div>
-                            <h4 style="margin: 0; color: {quest['color']};">{quest['name']}</h4>
-                            <small style="color: #81ecec;">Class Outcome: {quest['outcome']}</small>
+                            <h3 style="margin: 0; color: {quest['color']}; font-family: 'Fredoka';">{quest['name']}</h3>
+                            <p style="margin: 5px 0 0 0; color: #81ecec; font-size: 0.9rem;">Mastery: {quest['outcome']}</p>
                         </div>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
-
-            # Click to Expand/Select
-            if st.button(f"Unlock {quest['name']} Quest Path", key=f"select_{key}", use_container_width=True):
-                # This grabs the internal ID (e.g., 'python') of the first step
-                first_step_lang = quest['path'][0][1] 
-
-                st.session_state.current_language = first_step_lang
-                st.session_state.current_page = "world_map"
-                st.session_state.selected_arc = 1
+            
+            # Use a column layout for the "Toggle" button to keep it clean
+            btn_label = f"🔼 Close Path" if is_selected else f"🔽 Reveal {quest['name']} Path"
+            if st.button(btn_label, key=f"select_{key}", use_container_width=True):
+                st.session_state.selected_hero_quest = key if not is_selected else None
                 st.rerun()
 
-        # If this quest is selected, show the clickable language path
+        # THE REVEALED PATH
         if is_selected:
-            st.markdown(f"<div style='padding-left: 50px; margin-bottom: 20px; border-left: 2px dashed {quest['color']};'>", unsafe_allow_html=True)
-            st.info(f"✨ Journey to becoming a {quest['outcome']}: Click a skill to start!")
-
-            # Show path as buttons
+            st.markdown(f"""
+            <div style='padding: 1rem; margin-left: 40px; margin-bottom: 20px; border-left: 2px dashed {quest['color']}; background: rgba(0,0,0,0.2); border-radius: 0 15px 15px 0;'>
+                <p style="color: #dcdde1; font-size: 0.85rem; margin-bottom: 15px;">✨ Click a step to teleport to that Realm:</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Horizontal Path Buttons
             cols = st.columns(len(quest['path']))
             for idx, (lang_label, lang_id) in enumerate(quest['path']):
                 with cols[idx]:
-                    if st.button(f"Step {idx+1}\n{lang_label}", key=f"path_{key}_{lang_id}", use_container_width=True):
+                    # The "Step" indicator
+                    st.markdown(f"<p style='text-align:center; color:{quest['color']}; font-size:0.7rem; margin-bottom:2px;'>STEP {idx+1}</p>", unsafe_allow_html=True)
+                    
+                    if st.button(lang_label, key=f"path_{key}_{lang_id}", use_container_width=True):
+                        # 1. Update the language
                         st.session_state.current_language = lang_id
+                        # 2. Switch to World Map page
                         st.session_state.current_page = "world_map"
-                        st.session_state.selected_arc = 1
+                        # 3. CRITICAL: Go straight to the S-Curve (local) view
+                        st.session_state.map_view = "local"
+                        # 4. Reset to arc 1 for that language (or keep current if you prefer)
+                        st.session_state.selected_arc = st.session_state.current_arc.get(lang_id, 1)
                         st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_dashboard():
