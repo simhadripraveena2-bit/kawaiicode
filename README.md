@@ -2,7 +2,7 @@
 
 The Ultimate Gamified Coding Sanctuary. Learn 21 different disciplines—from Core Programming to Data Engineering and Business Analysis—through an anime-inspired, story-driven experience.
 
-Live Demo: https://kawaiicode-nfujkkr2fm5wrxlowxxj3y.streamlit.app/
+Live Demo: [https://kawaiicode-nfujkkr2fm5wrxlowxxj3y.streamlit.app/](https://xyqtjune54wsugtyctuua9.streamlit.app/)
 
 # ✨ Features
 
